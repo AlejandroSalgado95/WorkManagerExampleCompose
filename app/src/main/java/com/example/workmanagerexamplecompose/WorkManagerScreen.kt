@@ -80,6 +80,7 @@ fun WorkManagerScreen(
 
                     val fileUri = createImageFile(context)
 
+                    /*
                     val imageUri =  Uri.parse("android.resource://${context.packageName}/drawable/landscape")
 
                     val imageBytes = context.contentResolver.openInputStream(imageUri)?.use {
@@ -93,13 +94,13 @@ fun WorkManagerScreen(
                     }
                     val imageBase64 = Base64.encodeToString(reducedImageBytes, Base64.DEFAULT)
 
-                    Log.d("REDUCED_BYTES_SIZE", imageBase64.toByteArray().size.toString())
+                    Log.d("REDUCED_BYTES_SIZE", imageBase64.toByteArray().size.toString())*/
 
                     request = OneTimeWorkRequestBuilder<DownloadWorker>()
                         .setInputData(
                             workDataOf(
                                 "file_uri" to fileUri.toString(),
-                                "base64_image" to imageBase64
+                                /*"base64_image" to imageBase64*/
                             )
                         ).build()
 
@@ -192,7 +193,7 @@ private fun createImageFile(context: Context): Uri? {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/workmanager_pictures")
         } else {
-            Environment.getExternalStoragePublicDirectory("${Environment.DIRECTORY_DCIM}/workmanager_test")
+            Environment.getExternalStoragePublicDirectory("${Environment.DIRECTORY_DCIM}/workmanager_pictures")
         }
     }
     return resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
@@ -210,6 +211,8 @@ private fun reduceImageByteSize(imageBytes: ByteArray, thresholdBytesSize: Int):
             outputBytes = outputStream.toByteArray()
             quality -= 10
         }
+        Log.d("REDUCING_BYTES_SIZE", outputBytes?.size.toString())
+        Log.d("BYTES_SIZE_QUALITY", quality.toString())
     } while (outputBytes.size > thresholdBytesSize)
 
     return outputBytes

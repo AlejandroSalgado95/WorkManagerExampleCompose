@@ -28,22 +28,31 @@ class DownloadWorker(
     override suspend fun doWork(): Result {
         Log.d("WORKMANAGER_STARTED", "WOW")
         startForegroundService()
+        delay(5000L)
         Log.d("WORKMANAGER_FOREGROUND", "WOW")
         //var imageFile = ""
 
-        //val imageFileTest = workerParams.inputData.getString("file_uri")
-        //Log.d("FILE_URI_WORKMANAGER", imageFileTest.toString())
+        val imageFileTest = workerParams.inputData.getString("file_uri")
+        Log.d("WORKMANAGER_FILE_URI", imageFileTest.toString())
 
         var imageUri = Uri.parse(workerParams.inputData.getString("file_uri"))
         var imageFile = File(imageUri.path)
 
-        delay(5000L)
+        Log.d("WORKMANAGER_FILE_PATH", imageUri.path.toString())
 
-        val imageBase64 = workerParams.inputData.getString("base64_image")
-        val imageByteArray: ByteArray = Base64.decode(imageBase64, Base64.DEFAULT)
+
+        //imageFile = File(context.cacheDir, "image.jpg")
+
+        //val imageBase64 = workerParams.inputData.getString("base64_image")
+        //val imageByteArray: ByteArray = Base64.decode(imageBase64, Base64.DEFAULT)
+
+        val image =  Uri.parse("android.resource://${context.packageName}/drawable/landscape")
+        val imageByteArray = context.contentResolver.openInputStream(image)?.use {
+            it.readBytes()
+        }
 
         Log.d("WORKMANAGER_CONTINUED", "WOW")
-        Log.d("WORKMANAGER_BYTES_SIZE", imageByteArray.size.toString())
+        Log.d("WORKMANAGER_BYTES_SIZE", imageByteArray?.size.toString())
 
 
         if (imageFile.exists()){
@@ -51,12 +60,12 @@ class DownloadWorker(
         } else{
             Log.d("WORKMANAGER_FILE_DOESNOTEXIST", "WOW")
         }
+
         //THIS LINE ENDS THE WORKER PROCESS
         val outputStream = FileOutputStream(imageFile)
 
 
         return withContext(Dispatchers.IO) {
-            Log.d("WORKMANAGER_BEFORE_DYING", "WOW")
             outputStream.use { stream ->
                 try {
                     stream.write(imageByteArray)
